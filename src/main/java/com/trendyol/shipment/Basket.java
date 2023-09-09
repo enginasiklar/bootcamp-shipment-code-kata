@@ -1,5 +1,4 @@
 package com.trendyol.shipment;
-
 import java.util.List;
 
 public class Basket {
@@ -7,7 +6,8 @@ public class Basket {
     private List<Product> products;
 
     public ShipmentSize getShipmentSize() {
-        return null;
+        ShipmentSizeController controller = new ShipmentSizeController(this);
+        return controller.findShipmentSize();
     }
 
     public List<Product> getProducts() {
@@ -17,4 +17,6 @@ public class Basket {
     public void setProducts(List<Product> products) {
         this.products = products;
     }
+
+    public Integer getBasketSize(){ return products.size(); }
 }
