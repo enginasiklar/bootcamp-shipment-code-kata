@@ -1,42 +1,43 @@
 package com.trendyol.shipment;
 import java.util.HashMap;
-import java.util.Map;
 
 class ShipmentSizeController {
-    HashMap<ShipmentSize, Integer> shipmentSizeMap = new HashMap<>();
-    Basket basket;
-    Integer groupThreshold = 3;
-    public ShipmentSizeController(Basket basket){
+    private static final Integer GROUP_THRESHOLD = 3;
+    private final HashMap<ShipmentSize, Integer> shipmentSizeMap = new HashMap<>();
+    private final Basket basket;
+    private final ShipmentSize[] sizes;
+
+    public ShipmentSizeController(Basket basket) {
         this.basket = basket;
+        this.sizes = ShipmentSize.values();
     }
+
     public ShipmentSize findShipmentSize() {
         countShipmentSizes();
-        return (basket.getBasketSize() >= groupThreshold) ? findLargestGroup() : findLargestSize();
+        return (basket.getBasketSize() >= GROUP_THRESHOLD) ? findLargestGroup() : findLargestSize();
     }
-    private void countShipmentSizes(){
-        for (Product item : basket.getProducts())
+
+    private void countShipmentSizes() {
+        for (Product item : basket.getProducts()) {
             shipmentSizeMap.put(item.getSize(), shipmentSizeMap.getOrDefault(item.getSize(), 0) + 1);
+        }
     }
-    private ShipmentSize findLargestGroup()  {
-        ShipmentSize largestSize = null;
 
-        for (Map.Entry<ShipmentSize, Integer> entry : shipmentSizeMap.entrySet()) {
-            if (entry.getValue() >= groupThreshold) {
-                if (largestSize == null || entry.getKey().compareTo(largestSize) > 0) {
-                    largestSize = entry.getKey();
-                }
+    private ShipmentSize findLargestGroup() {
+        for (int i = sizes.length - 1; i >= 0; i--) {
+            if (shipmentSizeMap.getOrDefault(sizes[i], 0) >= GROUP_THRESHOLD) {
+                return sizes[i].upgradeShipmentSize();
             }
         }
-        return (largestSize != null) ? largestSize.upgradeShipmentSize() : findLargestSize();
+        return findLargestSize();
     }
+
     private ShipmentSize findLargestSize() {
-        ShipmentSize largestSize = null;
-
-        for (ShipmentSize size : shipmentSizeMap.keySet()) {
-            if (largestSize == null || size.compareTo(largestSize) > 0) {
-                largestSize = size;
+        for (int i = sizes.length - 1; i >= 0; i--) {
+            if (shipmentSizeMap.getOrDefault(sizes[i], 0) > 0) {
+                return sizes[i];
             }
         }
-        return largestSize;
+        return null;
     }
 }
