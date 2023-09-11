@@ -9,8 +9,11 @@ public class Basket {
         if (isBasketEmpty()) {
             throw new IllegalStateException("Cannot determine size for an empty shipment.");
         }
-        ShipmentSizeController controller = new ShipmentSizeController(this);
-        return controller.findShipmentSize();
+        ShipmentSize size = new ShipmentSizeController(this).findShipmentSize();
+        if (size == null) {
+            throw new IllegalStateException("Failed to determine shipment size.");
+        }
+        return size;
     }
 
     public boolean isBasketEmpty() { return this.getProducts().isEmpty(); }
