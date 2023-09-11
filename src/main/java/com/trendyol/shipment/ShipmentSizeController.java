@@ -1,4 +1,5 @@
 package com.trendyol.shipment;
+import java.util.Arrays;
 import java.util.HashMap;
 
 class ShipmentSizeController {
@@ -14,7 +15,7 @@ class ShipmentSizeController {
 
     public ShipmentSize findShipmentSize() {
         countShipmentSizes();
-        return (basket.getBasketSize() >= GROUP_THRESHOLD) ? findLargestGroup() : findLargestSize();
+        return (basket.getBasketSize() >= GROUP_THRESHOLD) ? findGroupWithLargestShipmentSize() : findLargestShipmentSize();
     }
 
     private void countShipmentSizes() {
@@ -22,22 +23,18 @@ class ShipmentSizeController {
             shipmentSizeMap.put(item.getSize(), shipmentSizeMap.getOrDefault(item.getSize(), 0) + 1);
         }
     }
-
-    private ShipmentSize findLargestGroup() {
-        for (int i = sizes.length - 1; i >= 0; i--) {
-            if (shipmentSizeMap.getOrDefault(sizes[i], 0) >= GROUP_THRESHOLD) {
-                return sizes[i].upgradeShipmentSize();
-            }
-        }
-        return findLargestSize();
+    private ShipmentSize findGroupWithLargestShipmentSize() {
+        return Arrays.stream(sizes)
+                .filter(size -> shipmentSizeMap.getOrDefault(size, 0) >= GROUP_THRESHOLD)
+                .findFirst()
+                .map(ShipmentSize::upgradeShipmentSize)
+                .orElseGet(this::findLargestShipmentSize);
     }
 
-    private ShipmentSize findLargestSize() {
-        for (int i = sizes.length - 1; i >= 0; i--) {
-            if (shipmentSizeMap.getOrDefault(sizes[i], 0) > 0) {
-                return sizes[i];
-            }
-        }
-        return null;
+    private ShipmentSize findLargestShipmentSize()  {
+        return Arrays.stream(sizes)
+                .filter(size -> shipmentSizeMap.getOrDefault(size, 0) > 0)
+                .findFirst()
+                .orElse(null);
     }
 }
